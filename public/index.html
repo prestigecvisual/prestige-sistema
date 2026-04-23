@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prestige Store - Checkout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-to-store {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .back-to-store:hover {
+            background: #5a67d8;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .row {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .metodo-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metodo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .metodo-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .metodo-btn.pix.active { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); border-color: #25D366; }
+        .metodo-btn.debito.active { background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); border-color: #FF9800; }
+        .metodo-btn.credito.active { background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); border-color: #9C27B0; }
+
+        .metodo-badge {
+            font-size: 12px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        .metodo-btn.active .metodo-badge {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .resumo {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .resumo h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .resumo-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .resumo-item.total {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-bottom: none;
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+
+        .desconto {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .taxa {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .parcela-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .btn-pagar {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+
+        .btn-pagar:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-pagar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pix-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+            border: 2px solid #25D366;
+            animation: fadeIn 0.5s;
+        }
+
+        .pix-area h3 {
+            text-align: center;
+            color: #25D366;
+            margin-bottom: 20px;
+        }
+
+        .qrcode {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .qrcode img {
+            width: 220px;
+            height: 220px;
+            border: 3px solid #25D366;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            resize: none;
+            margin-bottom: 10px;
+            background: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cartao-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .cartao-form h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .row-2cols {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row-2cols .form-group {
+            flex: 1;
+        }
+
+        .btn-copiar {
+            background: #28a745;
+            margin-top: 0;
+        }
+
+        .btn-copiar:hover {
+            background: #218838;
+        }
+
+        .aviso-producao {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 20px;
+            }
+            .row-2cols {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">💰 Prestige Store</div>
+            <a href="loja.html" class="back-to-store">← Voltar à Loja</a>
+        </div>
+
+        <h1>💰 Finalizar Pedido</h1>
+        <p class="subtitle">Escolha a melhor forma de pagamento</p>
+
+        <div class="main-card">
+            <div class="aviso-producao">
+                ⚠️ <strong>AMBIENTE DE PRODUÇÃO</strong> - Transações com dinheiro REAL
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label>Valor dos produtos (R$)</label>
+                        <input type="number" id="valor-produtos" placeholder="Digite o valor" step="0.01" oninput="calcular()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Frete (R$)</label>
+                        <input type="number" id="frete" placeholder="Valor do frete" step="0.01" value="0" oninput="calcular()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Forma de pagamento</label>
+                        <button class="metodo-btn pix" onclick="selecionarMetodo('pix')">
+                            <span>💳 PIX</span>
+                            <span class="metodo-badge">até 2,5% desconto</span>
+                        </button>
+                        <button class="metodo-btn debito" onclick="selecionarMetodo('debito')">
+                            <span>💳 Débito</span>
+                            <span class="metodo-badge">sem acréscimo</span>
+                        </button>
+                        <button class="metodo-btn credito" onclick="selecionarMetodo('credito')">
+                            <span>💳 Crédito</span>
+                            <span class="metodo-badge">à vista sem acréscimo</span>
+                        </button>
+                    </div>
+
+                    <div class="form-group" id="parcelas-group" style="display: none;">
+                        <label>Parcelamento (com acréscimo)</label>
+                        <select id="parcelas" onchange="calcular()">
+                            <option value="1">1x à vista (sem acréscimo)</option>
+                            <option value="2">2x (+6,5%)</option>
+                            <option value="3">3x (+7,0%)</option>
+                            <option value="4">4x (+7,5%)</option>
+                            <option value="5">5x (+8,0%)</option>
+                            <option value="6">6x (+8,5%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="resumo">
+                        <h3>📋 Resumo do pedido</h3>
+                        <div class="resumo-item">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">R$ 0,00</span>
+                        </div>
+                        <div class="resumo-item">
+                            <span>Frete:</span>
+                            <span id="frete-valor">R$ 0,00</span>
+                        </div>
+                        <div class="resumo-item" id="desconto-item" style="display: none;">
+                            <span>🎉 Desconto PIX:</span>
+                            <span class="desconto" id="desconto-valor">- R$ 0,00</span>
+                        </div>
+                        <div class="resumo-item" id="taxa-item" style="display: none;">
+                            <span>📈 Acréscimo:</span>
+                            <span class="taxa" id="taxa-valor">+ R$ 0,00</span>
+                        </div>
+                        <div class="resumo-item total">
+                            <span><strong>Total a pagar:</strong></span>
+                            <span><strong id="total-final">R$ 0,00</strong></span>
+                        </div>
+                        <div class="parcela-info" id="parcela-info" style="display: none;"></div>
+                    </div>
+
+                    <button class="btn-pagar" id="btn-pagar" onclick="processarPagamento()">🔒 Ir para pagamento</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processando pagamento...</p>
+            </div>
+
+            <div class="pix-area" id="pix-area">
+                <h3>📱 Escaneie o QR Code</h3>
+                <div class="qrcode" id="qrcode"></div>
+                <p style="text-align: center;">ou</p>
+                <div class="codigo-area">
+                    <label>Código copia e cola:</label>
+                    <textarea id="codigo-pix" rows="3" readonly></textarea>
+                    <button class="btn-pagar btn-copiar" onclick="copiarCodigo()">📋 Copiar código PIX</button>
+                </div>
+            </div>
+
+            <div class="cartao-form" id="cartao-form">
+                <h3>💳 Dados do cartão</h3>
+                <div class="form-group">
+                    <label>Número do cartão</label>
+                    <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19">
+                </div>
+                <div class="row-2cols">
+                    <div class="form-group">
+                        <label>Validade</label>
+                        <input type="text" id="card-expiry" placeholder="MM/AA" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" id="card-cvv" placeholder="123" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nome no cartão</label>
+                    <input type="text" id="card-name" placeholder="Como está no cartão">
+                </div>
+                <div class="form-group">
+                    <label>CPF do titular</label>
+                    <input type="text" id="card-cpf" placeholder="000.000.000-00" maxlength="14">
+                </div>
+                <button class="btn-pagar" style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);" onclick="processarCartao()">💳 Pagar com cartão</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar Mercado Pago com Public Key de PRODUÇÃO
+        const mp = new MercadoPago('APP_USR-a39565b3-3ce9-4040-bf38-56586ea397ca');
+        
+        let metodoSelecionado = 'pix';
+        let calculoAtual = null;
+
+        function selecionarMetodo(metodo) {
+            metodoSelecionado = metodo;
+            
+            // Atualizar estilo dos botões
+            document.querySelectorAll('.metodo-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.metodo-btn.${metodo}`).classList.add('active');
+            
+            // Mostrar/esconder parcelas (só para crédito parcelado)
+            document.getElementById('parcelas-group').style.display = metodo === 'credito' ? 'block' : 'none';
+            
+            // Esconder áreas específicas
+            document.getElementById('pix-area').style.display = 'none';
+            document.getElementById('cartao-form').style.display = 'none';
+            
+            calcular();
+        }
+
+        async function calcular() {
+            const valor = parseFloat(document.getElementById('valor-produtos').value) || 0;
+            const frete = parseFloat(document.getElementById('frete').value) || 0;
+            const parcelasSelect = document.getElementById('parcelas');
+            const parcelas = parcelasSelect ? parseInt(parcelasSelect.value) : 1;
+            
+            if (valor === 0) {
+                document.getElementById('subtotal').innerHTML = 'R$ 0,00';
+                document.getElementById('total-final').innerHTML = 'R$ 0,00';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/calcular', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor, frete, metodo: metodoSelecionado, parcelas })
+                });
+                
+                calculoAtual = await response.json();
+                
+                // Atualizar resumo
+                document.getElementById('subtotal').innerHTML = `R$ ${calculoAtual.produtos.toFixed(2)}`;
+                document.getElementById('frete-valor').innerHTML = `R$ ${calculoAtual.frete.toFixed(2)}`;
+                document.getElementById('total-final').innerHTML = `R$ ${calculoAtual.valor_final.toFixed(2)}`;
+                
+                // Mostrar desconto ou taxa
+                if (calculoAtual.desconto && calculoAtual.desconto.valor > 0) {
+                    document.getElementById('desconto-item').style.display = 'flex';
+                    document.getElementById('desconto-valor').innerHTML = `- R$ ${calculoAtual.desconto.valor.toFixed(2)} (${calculoAtual.desconto.percentual}%)`;
+                    document.getElementById('taxa-item').style.display = 'none';
+                } else if (calculoAtual.taxa && calculoAtual.taxa.valor > 0) {
+                    document.getElementById('desconto-item').style.display = 'none';
+                    document.getElementById('taxa-item').style.display = 'flex';
+                    document.getElementById('taxa-valor').innerHTML = `+ R$ ${calculoAtual.taxa.valor.toFixed(2)} (${calculoAtual.taxa.percentual}%)`;
+                } else {
+                    document.getElementById('desconto-item').style.display = 'none';
+                    document.getElementById('taxa-item').style.display = 'none';
+                }
+                
+                // Mostrar info de parcelas
+                if (calculoAtual.parcelas && calculoAtual.parcelas > 1) {
+                    const valorParcela = calculoAtual.valor_final / calculoAtual.parcelas;
+                    document.getElementById('parcela-info').style.display = 'block';
+                    document.getElementById('parcela-info').innerHTML = `${calculoAtual.parcelas}x de R$ ${valorParcela.toFixed(2)}`;
+                } else {
+                    document.getElementById('parcela-info').style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Erro ao calcular:', error);
+            }
+        }
+
+        async function processarPagamento() {
+            const valor = parseFloat(document.getElementById('valor-produtos').value) || 0;
+            const frete = parseFloat(document.getElementById('frete').value) || 0;
+            
+            if (valor === 0) {
+                alert('Digite o valor do pedido');
+                return;
+            }
+            
+            if (metodoSelecionado === 'pix') {
+                await processarPix(valor, frete);
+            } else {
+                // Mostrar formulário do cartão
+                document.getElementById('cartao-form').style.display = 'block';
+                document.getElementById('pix-area').style.display = 'none';
+            }
+        }
+
+        async function processarPix(valor, frete) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('pix-area').style.display = 'none';
+            document.getElementById('btn-pagar').disabled = true;
+            
+            try {
+                const response = await fetch('/api/pix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor, frete })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    // Mostrar QR Code
+                    document.getElementById('qrcode').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" alt="QR Code PIX">`;
+                    document.getElementById('codigo-pix').value = data.qr_code;
+                    document.getElementById('pix-area').style.display = 'block';
+                    
+                    // Rolagem suave até o QR Code
+                    document.getElementById('pix-area').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Erro ao gerar pagamento PIX: ' + (data.erro || 'Erro desconhecido'));
+                }
+                
+            } catch (error) {
+                alert('Erro ao processar pagamento: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('btn-pagar').disabled = false;
+            }
+        }
+
+        async function processarCartao() {
+            const valor = parseFloat(document.getElementById('valor-produtos').value) || 0;
+            const frete = parseFloat(document.getElementById('frete').value) || 0;
+            const parcelasSelect = document.getElementById('parcelas');
+            const parcelas = parcelasSelect && metodoSelecionado === 'credito' ? parseInt(parcelasSelect.value) : 1;
+            
+            // Validar dados do cartão
+            const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+            const cardExpiry = document.getElementById('card-expiry').value;
+            const cardCvv = document.getElementById('card-cvv').value;
+            const cardName = document.getElementById('card-name').value;
+            const cardCpf = document.getElementById('card-cpf').value;
+            
+            if (!cardNumber || cardNumber.length < 15) {
+                alert('Digite um número de cartão válido');
+                return;
+            }
+            
+            if (!cardExpiry || cardExpiry.length < 5) {
+                alert('Digite a validade do cartão');
+                return;
+            }
+            
+            if (!cardCvv || cardCvv.length < 3) {
+                alert('Digite o CVV do cartão');
+                return;
+            }
+            
+            if (!cardName) {
+                alert('Digite o nome no cartão');
+                return;
+            }
+            
+            if (!cardCpf) {
+                alert('Digite o CPF do titular');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('btn-pagar').disabled = true;
+            
+            try {
+                let endpoint = metodoSelecionado === 'debito' ? '/api/debito' : '/api/credito';
+                let body = { 
+                    valor, 
+                    frete, 
+                    token_card: 'simulado' // Em produção, use token real do cardform
+                };
+                
+                if (metodoSelecionado === 'credito') {
+                    body.parcelas = parcelas;
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    alert(`✅ Pagamento ${metodoSelecionado === 'debito' ? 'Débito' : 'Crédito'} processado com sucesso!\n\nID: ${data.payment_id}\nStatus: ${data.status_pagamento}\nValor: R$ ${data.valor_final.toFixed(2)}`);
+                    
+                    // Limpar formulário
+                    document.getElementById('cartao-form').style.display = 'none';
+                    document.getElementById('card-number').value = '';
+                    document.getElementById('card-expiry').value = '';
+                    document.getElementById('card-cvv').value = '';
+                    document.getElementById('card-name').value = '';
+                    document.getElementById('card-cpf').value = '';
+                    
+                    // Redirecionar ou limpar carrinho
+                    if (confirm('Pedido finalizado! Deseja voltar à loja?')) {
+                        window.location.href = 'loja.html';
+                    }
+                } else {
+                    alert('Erro ao processar pagamento com cartão: ' + (data.erro || 'Erro desconhecido'));
+                }
+                
+            } catch (error) {
+                alert('Erro: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('btn-pagar').disabled = false;
+            }
+        }
+
+        function copiarCodigo() {
+            const codigo = document.getElementById('codigo-pix');
+            codigo.select();
+            codigo.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            alert('✅ Código PIX copiado com sucesso!');
+        }
+
+        // Formatação do cartão
+        document.getElementById('card-number')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+            e.target.value = value.slice(0, 19);
+        });
+        
+        document.getElementById('card-expiry')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0,2) + '/' + value.slice(2);
+            }
+            e.target.value = value.slice(0, 5);
+        });
+        
+        document.getElementById('card-cvv')?.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        });
+        
+        document.getElementById('card-cpf')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 3) value = value.slice(0,3) + '.' + value.slice(3);
+            if (value.length >= 7) value = value.slice(0,7) + '.' + value.slice(7);
+            if (value.length >= 11) value = value.slice(0,11) + '-' + value.slice(11);
+            e.target.value = value.slice(0, 14);
+        });
+
+        // Verificar se veio valor do carrinho
+        const totalCarrinho = localStorage.getItem('pedido_total');
+        const produtosCarrinho = localStorage.getItem('pedido_produtos');
+        
+        if (totalCarrinho && parseFloat(totalCarrinho) > 0) {
+            document.getElementById('valor-produtos').value = parseFloat(totalCarrinho).toFixed(2);
+            calcular();
+            // Limpar carrinho após usar
+            localStorage.removeItem('pedido_total');
+            localStorage.removeItem('pedido_produtos');
+        }
+
+        // Inicializar
+        selecionarMetodo('pix');
+    </script>
+</body>
+</html>
