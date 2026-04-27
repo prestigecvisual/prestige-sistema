@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaveiros - Prestige Acrílicos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .btn-voltar { display: inline-block; margin-bottom: 20px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 8px; }
+        .btn-voltar:hover { background: #5a67d8; }
+        .section-title { font-size: 28px; margin: 40px 0 20px; color: #333; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+        .section-title:first-of-type { margin-top: 0; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .produto-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); transition: transform 0.3s; cursor: pointer; }
+        .produto-card:hover { transform: translateY(-5px); }
+        .card-imagem { height: 180px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 70px; }
+        .card-info { padding: 15px; text-align: center; }
+        .card-info h3 { font-size: 18px; margin-bottom: 5px; color: #333; }
+        .card-info .medida { font-size: 13px; color: #666; margin-bottom: 5px; }
+        .card-info .face { font-size: 12px; color: #667eea; margin-bottom: 8px; font-weight: bold; }
+        .card-info .preco { font-size: 22px; font-weight: bold; color: #28a745; }
+        .card-info .cores { font-size: 11px; color: #999; margin-top: 5px; }
+        @media (max-width: 768px) { .cards-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔑 Chaveiros Personalizados</h1>
+        <p>Acrílico cristal 3mm - Impressão UV - Corte a laser</p>
+    </div>
+    <div class="container">
+        <a href="index.html" class="btn-voltar">← Voltar para Home</a>
+
+        <!-- SEÇÃO 1 FACE -->
+        <h2 class="section-title">🎨 1 FACE - Impressão em um lado</h2>
+        <div class="cards-grid" id="cards-1face"></div>
+
+        <!-- SEÇÃO 2 FACES -->
+        <h2 class="section-title">🔄 2 FACES - Impressão frente e verso</h2>
+        <div class="cards-grid" id="cards-2faces"></div>
+
+        <!-- SEÇÃO PERSONALIZADO -->
+        <h2 class="section-title">✨ PERSONALIZADO - Sob Medida</h2>
+        <div class="cards-grid" id="cards-personalizado"></div>
+    </div>
+
+    <script>
+        // PRODUTOS 1 FACE (PREÇOS CORRIGIDOS: R$25 / R$27)
+        const produtos1Face = [
+            { id: 'oval-1f', nome: 'Oval', medida: '5x9cm', preco: 25, imagem: '🥚', face: '1 Face', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-59-1f', nome: 'Retangular', medida: '5x9cm', preco: 25, imagem: '📐', face: '1 Face', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-459-1f', nome: 'Retangular', medida: '4,5x9cm', preco: 25, imagem: '📐', face: '1 Face', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-5511-1f', nome: 'Retangular', medida: '5,5x11cm', preco: 25, imagem: '📐', face: '1 Face', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-610-1f', nome: 'Retangular', medida: '6x10cm', preco: 25, imagem: '📐', face: '1 Face', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'coracao-1f', nome: 'Coração', medida: '6x9cm', preco: 27, imagem: '♥', face: '1 Face', cores: 'Cristal, Branco, Colorido (+R$2)' }
+        ];
+
+        // PRODUTOS 2 FACES (PREÇOS CORRIGIDOS: R$33 / R$35)
+        const produtos2Faces = [
+            { id: 'oval-2f', nome: 'Oval', medida: '5x9cm', preco: 33, imagem: '🥚', face: '2 Faces', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-59-2f', nome: 'Retangular', medida: '5x9cm', preco: 33, imagem: '📐', face: '2 Faces', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-459-2f', nome: 'Retangular', medida: '4,5x9cm', preco: 33, imagem: '📐', face: '2 Faces', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-5511-2f', nome: 'Retangular', medida: '5,5x11cm', preco: 33, imagem: '📐', face: '2 Faces', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'retangular-610-2f', nome: 'Retangular', medida: '6x10cm', preco: 33, imagem: '📐', face: '2 Faces', cores: 'Cristal, Branco, Colorido (+R$2)' },
+            { id: 'coracao-2f', nome: 'Coração', medida: '6x9cm', preco: 35, imagem: '♥', face: '2 Faces', cores: 'Cristal, Branco, Colorido (+R$2)' }
+        ];
+
+        function renderizarCards(containerId, produtos) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = produtos.map(p => `
+                <div class="produto-card" onclick="window.location.href='produto.html?id=${p.id}'">
+                    <div class="card-imagem">${p.imagem}</div>
+                    <div class="card-info">
+                        <h3>${p.nome}</h3>
+                        <div class="medida">${p.medida}</div>
+                        <div class="face">${p.face}</div>
+                        <div class="preco">R$ ${p.preco.toFixed(2)}</div>
+                        <div class="cores">🎨 ${p.cores}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Card Personalizado
+        function renderizarPersonalizado() {
+            const container = document.getElementById('cards-personalizado');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="produto-card" onclick="window.location.href='produto.html?id=personalizado'">
+                    <div class="card-imagem">✨</div>
+                    <div class="card-info">
+                        <h3>Personalizado</h3>
+                        <div class="medida">Sob Medida</div>
+                        <div class="face">1 Face ou 2 Faces</div>
+                        <div class="preco">Sob consulta</div>
+                        <div class="cores">🎨 Cristal, Branco, Colorido</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        renderizarCards('cards-1face', produtos1Face);
+        renderizarCards('cards-2faces', produtos2Faces);
+        renderizarPersonalizado();
+    </script>
+</body>
+</html>
