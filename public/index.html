@@ -353,18 +353,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">💰 Prestige Store</div>
+            <div class="logo" style="display:flex;align-items:center;gap:14px;background:none;-webkit-text-fill-color:initial;color:#38326e"><img src="/img/logo-prestige.png" alt="Logo Prestige" style="width:64px;height:64px;object-fit:contain"><span>Prestige Comunicação Visual<small style="display:block;font-size:13px;font-weight:normal;color:#666">Recebimento de pedidos</small></span></div>
             <a href="loja.html" class="back-to-store">← Voltar à Loja</a>
         </div>
 
-        <h1>💰 Finalizar Pedido</h1>
-        <p class="subtitle">Escolha a melhor forma de pagamento</p>
+        <h1>Recebimento de Pedido</h1>
+        <p class="subtitle">Confira os dados do pedido e escolha a forma de pagamento</p>
 
         <div class="main-card">
             <div class="aviso-producao">
                 ⚠️ <strong>AMBIENTE DE PRODUÇÃO</strong> - Transações com dinheiro REAL
             </div>
 
+            <div id="identificacao-v4" style="display:none;background:#f5f4ff;border:1px solid #ddd9f5;border-radius:12px;padding:18px;margin-bottom:24px">
+                <div style="font-weight:700;color:#4d438e;margin-bottom:8px">DADOS DO PEDIDO</div>
+                <div><strong>Número:</strong> <span id="numero-pedido-v4"></span></div>
+                <div style="margin-top:6px"><strong>Cliente:</strong> <span id="nome-cliente-v4"></span></div>
+            </div>
             <div class="row">
                 <div class="col">
                     <div class="form-group">
@@ -377,6 +382,11 @@
                         <input type="number" id="frete" placeholder="Valor do frete" step="0.01" value="0" oninput="calcular()">
                     </div>
 
+                    <div class="form-group" id="desconto-manual-v4" style="display:none">
+                        <label>Desconto adicional negociado no recebimento (R$)</label>
+                        <input type="number" id="desconto-recebimento" min="0" step="0.01" value="0" oninput="calcular()">
+                        <small style="color:#7a5500;display:block;margin-top:6px">Prévia: descontos adicionais ainda precisam de validação no servidor antes de gerar cobrança.</small>
+                    </div>
                     <div class="form-group">
                         <label>Forma de pagamento</label>
                         <button class="metodo-btn pix" onclick="selecionarMetodo('pix')">
@@ -424,6 +434,10 @@
                         <div class="resumo-item" id="taxa-item" style="display: none;">
                             <span>📈 Acréscimo:</span>
                             <span class="taxa" id="taxa-valor">+ R$ 0,00</span>
+                        </div>
+                        <div class="resumo-item" id="desconto-manual-item" style="display:none">
+                            <span>Desconto negociado:</span>
+                            <span class="desconto" id="desconto-manual-valor">- R$ 0,00</span>
                         </div>
                         <div class="resumo-item total">
                             <span><strong>Total a pagar:</strong></span>
@@ -529,7 +543,13 @@
                 // Atualizar resumo
                 document.getElementById('subtotal').innerHTML = `R$ ${calculoAtual.produtos.toFixed(2)}`;
                 document.getElementById('frete-valor').innerHTML = `R$ ${calculoAtual.frete.toFixed(2)}`;
-                document.getElementById('total-final').innerHTML = `R$ ${calculoAtual.valor_final.toFixed(2)}`;
+                const adicional = veioDoV4 ? Number(document.getElementById('desconto-recebimento').value || 0) : 0;
+                const valido = Number.isFinite(adicional) && adicional >= 0 && adicional <= calculoAtual.valor_final;
+                document.getElementById('desconto-manual-item').style.display = adicional > 0 && valido ? 'flex' : 'none';
+                if (valido && adicional > 0) document.getElementById('desconto-manual-valor').textContent = '- R$ ' + adicional.toFixed(2);
+                document.getElementById('total-final').textContent = valido ? 'R$ ' + (calculoAtual.valor_final - adicional).toFixed(2) : 'Desconto inválido';
+                document.getElementById('btn-pagar').disabled = !valido || (veioDoV4 && adicional > 0);
+                document.getElementById('btn-pagar').textContent = veioDoV4 && adicional > 0 ? 'Desconto pendente de autorização' : '🔒 Ir para pagamento';
                 
                 // Mostrar desconto ou taxa
                 if (calculoAtual.desconto && calculoAtual.desconto.valor > 0) {
@@ -560,6 +580,11 @@
         }
 
         async function processarPagamento() {
+            if (veioDoV4 && Number(document.getElementById('desconto-recebimento').value || 0) !== 0) {
+                alert('Desconto adicional ainda não está habilitado para cobrança: é necessária validação no servidor.');
+                return;
+            }
+
             const valor = parseFloat(document.getElementById('valor-produtos').value) || 0;
             const frete = parseFloat(document.getElementById('frete').value) || 0;
             
@@ -734,11 +759,33 @@
             e.target.value = value.slice(0, 14);
         });
 
+        // Pedido V4: preenchimento antes do checkout, sem recalcular frete.
+        const parametrosV4 = new URLSearchParams(window.location.search);
+        const veioDoV4 = parametrosV4.get('origem') === 'prestige-v4';
+        if (veioDoV4) {
+            const valorV4 = Number(parametrosV4.get('valor'));
+            const freteV4 = Number(parametrosV4.get('frete'));
+            const pedidoV4 = (parametrosV4.get('pedido') || '').slice(0, 60);
+            const clienteV4 = (parametrosV4.get('cliente') || '').slice(0, 100);
+            document.getElementById('identificacao-v4').style.display = 'block';
+            document.getElementById('desconto-manual-v4').style.display = 'block';
+            document.getElementById('numero-pedido-v4').textContent = pedidoV4 || 'Não informado';
+            document.getElementById('nome-cliente-v4').textContent = clienteV4 || 'Não informado (abra o link novamente pelo v4 atualizado)';
+            if (Number.isFinite(valorV4) && valorV4 >= 0 && Number.isFinite(freteV4) && freteV4 >= 0 && valorV4 + freteV4 > 0) {
+                document.getElementById('valor-produtos').value = valorV4.toFixed(2);
+                document.getElementById('frete').value = freteV4.toFixed(2);
+                const titulo = document.querySelector('.subtitle');
+                if (titulo && pedidoV4) titulo.textContent = 'Recebimento do pedido ' + pedidoV4;
+            } else {
+                alert('Valores do pedido inválidos. Confira o orçamento antes de receber.');
+            }
+        }
+
         // Verificar se veio valor do carrinho
         const totalCarrinho = localStorage.getItem('pedido_total');
         const produtosCarrinho = localStorage.getItem('pedido_produtos');
         
-        if (totalCarrinho && parseFloat(totalCarrinho) > 0) {
+        if (!veioDoV4 && totalCarrinho && parseFloat(totalCarrinho) > 0) {
             document.getElementById('valor-produtos').value = parseFloat(totalCarrinho).toFixed(2);
             calcular();
             // Limpar carrinho após usar
@@ -746,25 +793,8 @@
             localStorage.removeItem('pedido_produtos');
         }
 
-        // Receber valores do orçamento Prestige v4
-const parametros = new URLSearchParams(window.location.search);
-
-if (parametros.get('origem') === 'prestige-v4') {
-    const valor = Number(parametros.get('valor'));
-    const frete = Number(parametros.get('frete'));
-
-    if (
-        Number.isFinite(valor) && valor > 0 &&
-        Number.isFinite(frete) && frete >= 0
-    ) {
-        document.getElementById('valor-produtos').value = valor.toFixed(2);
-        document.getElementById('frete').value = frete.toFixed(2);
-    }
-}
-
-// Inicializar
-selecionarMetodo('pix');
-
+        // Inicializar
+        selecionarMetodo('pix');
     </script>
 </body>
 </html>
