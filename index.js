@@ -204,14 +204,14 @@ app.post('/api/calcular', (req, res) => {
         };
         
         if (metodo === 'pix') {
-            const desconto = calcularDescontoPix(valorTotal);
-            resultado.desconto = {
-                tipo: 'PIX',
-                percentual: desconto.percentual,
-                valor: desconto.valor
-            };
-            resultado.valor_final = valorTotal - desconto.valor;
-        } 
+          resultado.desconto = {
+            tipo: 'PIX',
+            percentual: 0,
+            valor: 0
+          };
+
+          resultado.valor_final = valorTotal;
+      }
         else if (metodo === 'debito') {
             const taxa = calcularTaxaCartao(valorTotal, 'debito');
             resultado.taxa = {
