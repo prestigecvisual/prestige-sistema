@@ -10,8 +10,8 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // ========== CREDENCIAIS DEFINITIVAS PRODUÇÃO ==========
-const ACCESS_TOKEN = 'APP_USR-7963257996384989-042112-561b320c44d5a9d748a9556fd3a768cb-656135150';
-const PUBLIC_KEY = 'APP_USR-a39565b3-3ce9-4040-bf38-56586ea397ca';
+const ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const PUBLIC_KEY = process.env.MERCADOPAGO_PUBLIC_KEY;
 
 // Configurar Mercado Pago
 mercadopago.configure({
@@ -70,8 +70,8 @@ app.post('/api/pix', async (req, res) => {
         let { valor, frete = 0 } = req.body;
         const valorTotal = valor + frete;
         
-        const desconto = calcularDescontoPix(valorTotal);
-        const valorComDesconto = valorTotal - desconto.valor;
+        const desconto = { percentual: 0, valor: 0 };
+        const valorComDesconto = valorTotal;
         
         const payment_data = {
             transaction_amount: Number(valorComDesconto.toFixed(2)),
