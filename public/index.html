@@ -746,8 +746,22 @@
             localStorage.removeItem('pedido_produtos');
         }
 
-        // Inicializar
-        selecionarMetodo('pix');
+        // Receber valores do orçamento Prestige v4
+const parametros = new URLSearchParams(window.location.search);
+
+if (parametros.get('origem') === 'prestige-v4') {
+    const valor = Number(parametros.get('valor'));
+    const frete = Number(parametros.get('frete'));
+
+    if (
+        Number.isFinite(valor) && valor > 0 &&
+        Number.isFinite(frete) && frete >= 0
+    ) {
+        document.getElementById('valor-produtos').value = valor.toFixed(2);
+        document.getElementById('frete').value = frete.toFixed(2);
+    }
+}
+
     </script>
 </body>
 </html>
