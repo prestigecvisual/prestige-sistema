@@ -98,6 +98,21 @@ function calcularDescontoNegociado(valor, frete, desconto) {
     };
 }
 
+// CONSULTAR DESCONTO AUTORIZADO PARA UM PEDIDO
+function consultarDescontoAutorizado(pedido, autorizacoes) {
+    if (typeof pedido !== 'string' || !pedido.trim()) {
+        throw new Error('Número do pedido obrigatório.');
+    }
+
+    const autorizacao = autorizacoes.get(pedido);
+
+    if (!autorizacao || autorizacao.status !== 'APROVADO') {
+        return 0;
+    }
+
+    return autorizacao.valor;
+}
+
 // ========== ROTAS DA API ==========
 
 // ROTA PIX COM DESCONTO
