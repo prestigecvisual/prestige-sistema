@@ -62,6 +62,42 @@ function calcularTaxaCartao(valorTotal, metodo, parcelas = 1) {
     };
 }
 
+// CÁLCULO DO DESCONTO NEGOCIADO
+function calcularDescontoNegociado(valor, frete, desconto) {
+    const produtos = Number(valor);
+    const entrega = Number(frete);
+    const abatimento = Number(desconto);
+
+    if (
+        !Number.isFinite(produtos) ||
+        !Number.isFinite(entrega) ||
+        !Number.isFinite(abatimento) ||
+        produtos <= 0 ||
+        entrega < 0 ||
+        abatimento < 0
+    ) {
+        throw new Error('Valores inválidos.');
+    }
+
+    const totalOriginal = Math.round(
+        (produtos + entrega) * 100
+    ) / 100;
+
+    if (abatimento > totalOriginal) {
+        throw new Error('Desconto superior ao valor do pedido.');
+    }
+
+    const valorFinal = Math.round(
+        (totalOriginal - abatimento) * 100
+    ) / 100;
+
+    return {
+        totalOriginal,
+        desconto: abatimento,
+        valorFinal
+    };
+}
+
 // ========== ROTAS DA API ==========
 
 // ROTA PIX COM DESCONTO
