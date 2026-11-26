@@ -306,6 +306,73 @@ app.get('/api/teste', (req, res) => {
     });
 });
 
+// ========== AUTORIZAÇÃO DROPBOX ==========
+
+const autorizacoesDropbox = new Map();
+
+// Iniciar autorização — somente com chave administrativa
+app.get('/api/dropbox/autorizar', (req, res) => {
+    const chave = req.get('X-Admin-Key');
+
+    if (
+        !process.env.DROPBOX_ADMIN_KEY ||
+        chave !== process.env.DROPBOX_ADMIN_KEY
+    ) {
+        return res.status(403).send('Acesso negado.');
+    }
+
+    const state = gerarState();
+
+    autorizacoesDropbox.set(state, Date.now());
+
+    res.json({
+        url: criarUrlAutorizacao(state)
+    });
+});
+
+// Receber autorização do Dropbox
+app.get('/api/dropbox/callback', async (req, res) => {
+    const { code, state, error } = req.query;
+
+    if (error) {
+        return res.status(400).send('Autorização recusada.');
+    }
+
+    const criadoEm = autorizacoesDropbox.get(state);
+    autorizacoesDropbox.delete(state);
+
+    if (
+        !criadoEm ||
+        Date.now() - criadoEm > 10 * 60 * 1000 ||
+        typeof code !== 'string'
+    ) {
+        return res.status(400).send('Autorização inválida ou expirada.');
+    }
+
+    try {
+        const tokens = await trocarCodigoPorTokens(code);
+
+        if (!tokens.refresh_token) {
+            return res.status(400).send(
+                'Dropbox não forneceu Refresh Token.'
+            );
+        }
+
+        // Não registrar o token em logs.
+        // Não devolver o token ao navegador.
+        // O armazenamento seguro será configurado na próxima etapa.
+
+        res.send(
+            'Dropbox autorizado. Falta configurar o armazenamento seguro do token.'
+        );
+
+    } catch (erro) {
+        console.error('Erro na autorização Dropbox:', erro.message);
+        res.status(500).send('Erro na autorização Dropbox.');
+    }
+});
+
+
 // ========== INICIAR SERVIDOR ==========
 const PORT = 3000;
 app.listen(PORT, () => {
