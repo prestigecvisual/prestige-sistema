@@ -308,22 +308,69 @@ app.get('/api/teste', (req, res) => {
 
 // ========== AUTORIZAÇÃO DROPBOX ==========
 
-const autorizacoesDropbox = new Map();
 
-// Iniciar autorização — somente com chave administrativa
-app.get('/api/dropbox/autorizar', (req, res) => {
-    const chave = req.get('X-Admin-Key');
+const cryptoDropbox = require('crypto');
+
+function criarStateDropbox() {
+    const criadoEm = Date.now().toString();
+    const aleatorio = cryptoDropbox.randomBytes(16).toString('hex');
+    const dados = `${criadoEm}.${aleatorio}`;
+
+    const assinatura = cryptoDropbox
+        .createHmac('sha256', process.env.DROPBOX_ADMIN_KEY)
+        .update(dados)
+        .digest('hex');
+
+    return `${dados}.${assinatura}`;
+}
+
+function validarStateDropbox(state) {
+    if (typeof state !== 'string') return false;
+
+    const partes = state.split('.');
+    if (partes.length !== 3) return false;
+
+    const [criadoEm, aleatorio, assinatura] = partes;
+    const timestamp = Number(criadoEm);
 
     if (
-        !process.env.DROPBOX_ADMIN_KEY ||
-        chave !== process.env.DROPBOX_ADMIN_KEY
+        !Number.isSafeInteger(timestamp) ||
+        timestamp > Date.now() ||
+        Date.now() - timestamp > 10 * 60 * 1000 ||
+        !/^[a-f0-9]{32}$/.test(aleatorio) ||
+        !/^[a-f0-9]{64}$/.test(assinatura)
+    ) {
+        return false;
+    }
+
+    const esperado = cryptoDropbox
+        .createHmac('sha256', process.env.DROPBOX_ADMIN_KEY)
+        .update(`${criadoEm}.${aleatorio}`)
+        .digest();
+
+    const recebido = Buffer.from(assinatura, 'hex');
+
+    return cryptoDropbox.timingSafeEqual(esperado, recebido);
+}
+
+// Iniciar autorização — acesso administrativo
+app.get('/api/dropbox/autorizar', (req, res) => {
+    const chave = req.get('X-Admin-Key');
+    const chaveConfigurada = process.env.DROPBOX_ADMIN_KEY;
+
+    if (
+        !chaveConfigurada ||
+        typeof chave !== 'string' ||
+        chave.length !== chaveConfigurada.length ||
+        !cryptoDropbox.timingSafeEqual(
+            Buffer.from(chave),
+            Buffer.from(chaveConfigurada)
+        )
     ) {
         return res.status(403).send('Acesso negado.');
     }
 
-    const state = gerarState();
-
-    autorizacoesDropbox.set(state, Date.now());
+    const state = criarStateDropbox();
 
     res.json({
         url: criarUrlAutorizacao(state)
@@ -338,16 +385,12 @@ app.get('/api/dropbox/callback', async (req, res) => {
         return res.status(400).send('Autorização recusada.');
     }
 
-    const criadoEm = autorizacoesDropbox.get(state);
-    autorizacoesDropbox.delete(state);
-
     if (
-        !criadoEm ||
-        Date.now() - criadoEm > 10 * 60 * 1000 ||
-        typeof code !== 'string'
-    ) {
+        !validarStateDropbox(state) ||
+            typeof code !== 'string'
+            ) {
         return res.status(400).send('Autorização inválida ou expirada.');
-    }
+        }
 
     try {
         const tokens = await trocarCodigoPorTokens(code);
