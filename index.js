@@ -1,4 +1,10 @@
-const express = require('express');
+const tokens = await trocarCodigoPorTokens(code);
+
+if (!tokens.refresh_token) {
+    return res.status(400).send(
+        'Dropbox não forneceu Refresh Token.'
+    );
+}const express = require('express');
 const mercadopago = require('mercadopago');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -401,6 +407,14 @@ app.get('/api/dropbox/callback', async (req, res) => {
             );
         }
 
+        // Guarda temporariamente o token na memória do servidor.
+// Nunca exibir o token no navegador ou nos logs.
+global.dropboxTokenPendente = {
+    token: tokens.refresh_token,
+    criadoEm: Date.now()
+};
+        
+
         // Não registrar o token em logs.
         // Não devolver o token ao navegador.
         // O armazenamento seguro será configurado na próxima etapa.
@@ -413,6 +427,42 @@ app.get('/api/dropbox/callback', async (req, res) => {
         console.error('Erro na autorização Dropbox:', erro.message);
         res.status(500).send('Erro na autorização Dropbox.');
     }
+});
+
+app.post('/api/dropbox/obter-token', (req, res) => {
+    const chave = req.get('X-Admin-Key');
+    const chaveConfigurada = process.env.DROPBOX_ADMIN_KEY;
+
+    if (
+        !chaveConfigurada ||
+        typeof chave !== 'string' ||
+        chave.length !== chaveConfigurada.length ||
+        !cryptoDropbox.timingSafeEqual(
+            Buffer.from(chave),
+            Buffer.from(chaveConfigurada)
+        )
+    ) {
+        return res.status(403).json({
+            erro: 'Acesso negado.'
+        });
+    }
+
+    const pendente = global.dropboxTokenPendente;
+
+    if (
+        !pendente ||
+        Date.now() - pendente.criadoEm > 10 * 60 * 1000
+    ) {
+        return res.status(404).json({
+            erro: 'Token indisponível ou expirado.'
+        });
+    }
+
+    delete global.dropboxTokenPendente;
+
+    res.json({
+        refresh_token: pendente.token
+    });
 });
 
 
