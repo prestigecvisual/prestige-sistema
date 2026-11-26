@@ -1,10 +1,4 @@
-const tokens = await trocarCodigoPorTokens(code);
-
-if (!tokens.refresh_token) {
-    return res.status(400).send(
-        'Dropbox não forneceu Refresh Token.'
-    );
-}const express = require('express');
+const express = require('express');
 const mercadopago = require('mercadopago');
 const cors = require('cors');
 const crypto = require('crypto');
