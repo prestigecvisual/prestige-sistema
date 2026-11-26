@@ -5,6 +5,11 @@ const crypto = require('crypto');
 const path = require('path');
 
 const app = express();
+const {
+    criarUrlAutorizacao,
+    trocarCodigoPorTokens,
+    gerarState
+} = require('./dropbox-service');
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
